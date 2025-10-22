@@ -15,3 +15,8 @@ ro.aospa.device                        u:object_r:custom_version_prop:s0
 ro.aospa.version                       u:object_r:custom_version_prop:s0
 ro.aospa.version.major                 u:object_r:custom_version_prop:s0
 ro.aospa.version.minor                 u:object_r:custom_version_prop:s0
+
+# Pixel props
+persist.sys.spoof.                     u:object_r:custom_version_prop:s0
+persist.sys.pihooks.                   u:object_r:custom_version_prop:s0
+persist.sys.pixelprops.                u:object_r:custom_version_prop:s0
