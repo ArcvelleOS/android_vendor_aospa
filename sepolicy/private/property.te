@@ -9,3 +9,6 @@ system_public_prop(mithermal_prop)
 
 # Pentas
 system_public_prop(pentas_prop)
+
+# Custom version
+system_internal_prop(custom_version_prop)

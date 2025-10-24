@@ -8,3 +8,10 @@ persist.sys.mithermal.                  u:object_r:mithermal_prop:s0
 
 # Pentas
 persist.sys.pentas.                     u:object_r:pentas_prop:s0
+
+# Custom version
+ro.aospa.build.variant                 u:object_r:custom_version_prop:s0
+ro.aospa.device                        u:object_r:custom_version_prop:s0
+ro.aospa.version                       u:object_r:custom_version_prop:s0
+ro.aospa.version.major                 u:object_r:custom_version_prop:s0
+ro.aospa.version.minor                 u:object_r:custom_version_prop:s0
