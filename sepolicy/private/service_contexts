@@ -24,3 +24,6 @@ game_space                                u:object_r:game_space_service:s0
 
 # Refresh Rate Manager
 refresh_rate_ext                            u:object_r:refresh_rate_manager_service:s0
+
+# Obscura
+obscura                                     u:object_r:obscura_service:s0

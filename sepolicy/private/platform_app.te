@@ -8,3 +8,6 @@ hal_client_domain(platform_app, hal_lineage_health)
 
 # Luminous: SystemUI mirrors the animation setting to the property read by apps.
 set_prop(platform_app, penguin_luminous_prop)
+
+# Obscura
+allow platform_app obscura_service:service_manager find;

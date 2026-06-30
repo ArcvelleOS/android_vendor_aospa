@@ -36,3 +36,6 @@ add_service(system_server, refresh_rate_manager_service);
 
 # Luminous
 get_prop(system_server, penguin_luminous_prop)
+
+# Obscura
+add_service(system_server, obscura_service);
