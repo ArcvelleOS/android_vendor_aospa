@@ -27,3 +27,9 @@ dontaudit system_app proc_slabinfo:file r_file_perms;
 # /proc/net/{tcp,udp}. Both are neverallowed for appdomain, so don't audit.
 dontaudit system_app self:netlink_tcpdiag_socket { create_socket_perms_no_ioctl nlmsg_read nlmsg };
 dontaudit system_app proc_net_tcp_udp:file r_file_perms;
+
+# Play Integrity
+allow system_app system_data_file:dir r_dir_perms;
+allow system_app system_data_file:file r_file_perms;
+allow system_app system_userdir_file:dir r_dir_perms;
+allow system_app system_userdir_file:file r_file_perms;
