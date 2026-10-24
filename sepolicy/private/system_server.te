@@ -33,3 +33,6 @@ add_service(system_server, game_space_service);
 
 # Refresh Rate Manager
 add_service(system_server, refresh_rate_manager_service);
+
+# Luminous
+get_prop(system_server, penguin_luminous_prop)

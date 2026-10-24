@@ -1,1 +1,4 @@
 get_prop(appdomain, pih_disable_prop)
+
+# Luminous
+get_prop(appdomain, penguin_luminous_prop)
