@@ -1,6 +1,3 @@
-# PIHooks
-persist.sys.pihooks.disable.            u:object_r:pih_disable_prop:s0
-
 # Tethering
 persist.device_config.tethering.        u:object_r:device_config_tethering_prop:s0
 
