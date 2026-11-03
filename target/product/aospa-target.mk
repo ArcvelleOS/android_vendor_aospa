@@ -87,6 +87,10 @@ $(call inherit-product, vendor/aospa/bootanimation/bootanimation.mk)
 PRODUCT_PACKAGES += \
     Aperture
 
+# Launcher app icon pack
+PRODUCT_PACKAGES += \
+    IconPackPUIAppIcons
+
 # Charger
 ifeq ($(TARGET_DISABLES_GMS), true)
 PRODUCT_PACKAGES += \
