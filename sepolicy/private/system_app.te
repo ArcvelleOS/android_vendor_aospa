@@ -1,6 +1,10 @@
 # Allow system_app to read the AOSPA version.
 get_prop(system_app, aospa_build_prop)
 
+# MiThermal and Pentas properties
+set_prop(system_app, mithermal_prop)
+set_prop(system_app, pentas_prop)
+
 # Allow Pentas to set process group
 allow system_app cgroup:dir search;
 allow system_app cgroup:file rw_file_perms;
@@ -11,8 +15,18 @@ allow system_app proc_loadavg:file r_file_perms;
 allow system_app proc_uptime:file r_file_perms;
 allow system_app proc_pid_max:file r_file_perms;
 allow system_app sysfs_thermal:dir r_dir_perms;
-allow system_app sysfs_thermal:file r_file_perms;
+allow system_app sysfs_thermal:file rw_file_perms;
+
+# Allow Pentas to configure CPU scaling frequencies and governor (PerfTuner)
+allow system_app sysfs_devices_system_cpu:dir r_dir_perms;
+allow system_app sysfs_devices_system_cpu:file rw_file_perms;
 
 # Pentas lists running processes; the ones it may not read are expected
 dontaudit system_app domain:dir r_dir_perms;
 dontaudit system_app domain:file r_file_perms;
+dontaudit system_app proc_slabinfo:file r_file_perms;
+
+# NetworkPingMonitor tries `ss`, which uses netlink sock_diag and falls back to
+# /proc/net/{tcp,udp}. Both are neverallowed for appdomain, so don't audit.
+dontaudit system_app self:netlink_tcpdiag_socket { create_socket_perms_no_ioctl nlmsg_read nlmsg };
+dontaudit system_app proc_net_tcp_udp:file r_file_perms;

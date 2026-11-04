@@ -9,3 +9,9 @@ system_internal_prop(device_config_tethering_prop)
 
 # Luminous
 system_public_prop(penguin_luminous_prop)
+
+# MiThermal
+system_public_prop(mithermal_prop)
+
+# Pentas
+system_public_prop(pentas_prop)

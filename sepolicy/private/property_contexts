@@ -8,3 +8,9 @@ persist.sys.pihooks.disable.            u:object_r:pih_disable_prop:s0
 persist.device_config.tethering.        u:object_r:device_config_tethering_prop:s0
 
 persist.sys.penguin.luminous            u:object_r:penguin_luminous_prop:s0 exact int
+
+# MiThermal
+persist.sys.mithermal.                  u:object_r:mithermal_prop:s0
+
+# Pentas
+persist.sys.pentas.                     u:object_r:pentas_prop:s0

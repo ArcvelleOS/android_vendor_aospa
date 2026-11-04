@@ -1,10 +1,15 @@
-# Allow Pentas to read GPU load and battery state. Searching the kgsl directory and
-# reading gpubusy are already granted to every domain by the qcom policy.
+# GPU telemetry and performance tuning on devices using generic KGSL labels.
+allow system_app vendor_sysfs_kgsl:dir r_dir_perms;
+allow system_app vendor_sysfs_kgsl:file rw_file_perms;
 allow system_app vendor_sysfs_kgsl:lnk_file r_file_perms;
+allow system_app vendor_sysfs_kgsl_gpuclk:file r_file_perms;
+
+# Battery telemetry
 allow system_app vendor_sysfs_battery_supply:dir r_dir_perms;
 allow system_app vendor_sysfs_battery_supply:file r_file_perms;
 
-# GPU telemetry on devices using generic KGSL labels.
-allow system_app vendor_sysfs_kgsl:dir r_dir_perms;
-allow system_app vendor_sysfs_kgsl:file r_file_perms;
-allow system_app vendor_sysfs_kgsl_gpuclk:file r_file_perms;
+# Pentas SoC and power sysfs
+allow system_app vendor_sysfs_devicetree_soc:dir r_dir_perms;
+allow system_app vendor_sysfs_devicetree_soc:file r_file_perms;
+r_dir_file(system_app, vendor_sysfs_devfreq)
+r_dir_file(system_app, vendor_sysfs_usb_supply)
