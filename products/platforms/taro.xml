@@ -4,9 +4,9 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <manifest>
-  <project path="hardware/qcom/display" name="android_hardware_qcom_display" remote="shadedark" revision="calcite-8450"/>
-  <project path="hardware/qcom/gps" name="android_hardware_qcom_gps" remote="shadedark" revision="calcite-8450"/>
-  <project path="vendor/qcom/opensource/agm" name="android_vendor_qcom_opensource_agm" remote="shadedark" revision="calcite-8450" />
-  <project path="vendor/qcom/opensource/audio-hal/primary-hal" name="android_hardware_qcom_audio" remote="shadedark" revision="calcite-8450" />
-  <project path="vendor/qcom/opensource/pal" name="android_vendor_qcom_opensource_arpal-lx" remote="shadedark" revision="calcite-8450" />
+  <project path="hardware/qcom/display" name="android_hardware_qcom_display" remote="arcvelle" revision="vertex-8450"/>
+  <project path="hardware/qcom/gps" name="android_hardware_qcom_gps" remote="arcvelle" revision="vertex-8450"/>
+  <project path="vendor/qcom/opensource/agm" name="android_vendor_qcom_opensource_agm" remote="arcvelle" revision="vertex-8450" />
+  <project path="vendor/qcom/opensource/audio-hal/primary-hal" name="android_hardware_qcom_audio" remote="arcvelle" revision="vertex-8450" />
+  <project path="vendor/qcom/opensource/pal" name="android_vendor_qcom_opensource_arpal-lx" remote="arcvelle" revision="vertex-8450" />
 </manifest>
