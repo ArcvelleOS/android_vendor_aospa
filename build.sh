@@ -116,6 +116,21 @@ if [ ! -d "$DIR_ROOT/vendor/aospa" ]; then
         exit 1
 fi
 
+# Use explicitly supplied signing keys for the build itself, so the
+# release variant is detected. In-tree keys are detected by version.mk.
+if [ -n "$KEY_MAPPINGS" ]; then
+        if [ ! -d "$KEY_MAPPINGS" ]; then
+                echo -e "${CLR_BLD_RED}error: signing keys directory not found ($KEY_MAPPINGS)${CLR_RST}"
+                exit 1
+        fi
+        ANDROID_CERTS_DIR="$(readlink -f "$KEY_MAPPINGS")"
+        if [ ! -f "$ANDROID_CERTS_DIR/releasekey.x509.pem" ] || [ ! -f "$ANDROID_CERTS_DIR/releasekey.pk8" ]; then
+                echo -e "${CLR_BLD_RED}error: release keys not found in $ANDROID_CERTS_DIR${CLR_RST}"
+                exit 1
+        fi
+        export ANDROID_CERTS_DIR
+fi
+
 # Setup AOSPA variant if specified
 if [ $AOSPA_VARIANT ]; then
     AOSPA_VARIANT=`echo $AOSPA_VARIANT |  tr "[:upper:]" "[:lower:]"`
