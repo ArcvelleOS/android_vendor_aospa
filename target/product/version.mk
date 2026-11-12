@@ -20,7 +20,10 @@ AOSPA_MAJOR_VERSION := vertex
 # Release signing keys.
 # In-tree keys are used automatically; external keys must be supplied with
 # build.sh -s <path>, which exports ANDROID_CERTS_DIR.
+# Only keys matching the pinned release certificate are treated as official.
 ARCVELLE_KEYS_DIR ?= vendor/arcvelle-priv/keys
+# Pinned release certificate fingerprint, kept next to this file.
+ARCVELLE_RELEASE_CERT_SHA256 := $(shell cat $(dir $(lastword $(MAKEFILE_LIST)))arcvelle-release-key.sha256 2>/dev/null)
 
 RELEASE_KEYS_DIR :=
 ifneq ($(ANDROID_CERTS_DIR),)
@@ -33,12 +36,18 @@ else ifneq ($(wildcard $(ARCVELLE_KEYS_DIR)/releasekey.x509.pem),)
 endif
 
 ifneq ($(RELEASE_KEYS_DIR),)
-  ifneq ($(AOSPA_EXTERNAL_KEYS),true)
-    $(call inherit-product-if-exists, $(ARCVELLE_KEYS_DIR)/keys.mk)
+  RELEASE_KEYS_CERT_SHA256 := $(shell openssl x509 -in $(RELEASE_KEYS_DIR)/releasekey.x509.pem -noout -fingerprint -sha256 2>/dev/null | sed 's/^.*=//' | tr '[:lower:]' '[:upper:]')
+  ifeq ($(RELEASE_KEYS_CERT_SHA256),$(ARCVELLE_RELEASE_CERT_SHA256))
+    ifneq ($(AOSPA_EXTERNAL_KEYS),true)
+      $(call inherit-product-if-exists, $(ARCVELLE_KEYS_DIR)/keys.mk)
+    endif
+    PRODUCT_DEFAULT_DEV_CERTIFICATE := $(RELEASE_KEYS_DIR)/releasekey
+    PRODUCT_MAINLINE_BLUETOOTH_SEPOLICY_DEV_CERTIFICATES := $(RELEASE_KEYS_DIR)/
+    AOSPA_SIGNED_KEYS := true
+  else
+    AOSPA_EXTERNAL_KEYS :=
+    $(warning Release keys in $(RELEASE_KEYS_DIR) do not match the pinned Arcvelle certificate; building as unofficial.)
   endif
-  PRODUCT_DEFAULT_DEV_CERTIFICATE := $(RELEASE_KEYS_DIR)/releasekey
-  PRODUCT_MAINLINE_BLUETOOTH_SEPOLICY_DEV_CERTIFICATES := $(RELEASE_KEYS_DIR)/
-  AOSPA_SIGNED_KEYS := true
 endif
 
 # The version code is the upgradable portion during the cycle of

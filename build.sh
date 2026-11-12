@@ -116,6 +116,30 @@ if [ ! -d "$DIR_ROOT/vendor/aospa" ]; then
         exit 1
 fi
 
+# Verify a keys directory against the pinned Arcvelle release certificate.
+function checkReleaseKeys {
+        local keys_dir="$1"
+        local fingerprint
+
+        if [ -z "$ARCVELLE_RELEASE_CERT_SHA256" ]; then
+                echo -e "${CLR_BLD_RED}error: pinned Arcvelle release fingerprint is missing${CLR_RST}"
+                return 1
+        fi
+        if [ ! -f "$keys_dir/releasekey.x509.pem" ] || [ ! -f "$keys_dir/releasekey.pk8" ]; then
+                echo -e "${CLR_BLD_RED}error: release keys not found in $keys_dir${CLR_RST}"
+                return 1
+        fi
+
+        fingerprint="$(openssl x509 -in "$keys_dir/releasekey.x509.pem" -noout -fingerprint -sha256 2>/dev/null | sed 's/^.*=//' | tr '[:lower:]' '[:upper:]')"
+        if [ "$fingerprint" != "$ARCVELLE_RELEASE_CERT_SHA256" ]; then
+                echo -e "${CLR_BLD_RED}error: keys in $keys_dir do not match the Arcvelle release key${CLR_RST}"
+                return 1
+        fi
+        return 0
+}
+
+ARCVELLE_RELEASE_CERT_SHA256="$(cat "$DIR_ROOT/vendor/aospa/target/product/arcvelle-release-key.sha256" 2>/dev/null)"
+
 # Use explicitly supplied signing keys for the build itself, so the
 # release variant is detected. In-tree keys are detected by version.mk.
 if [ -n "$KEY_MAPPINGS" ]; then
@@ -124,11 +148,10 @@ if [ -n "$KEY_MAPPINGS" ]; then
                 exit 1
         fi
         ANDROID_CERTS_DIR="$(readlink -f "$KEY_MAPPINGS")"
-        if [ ! -f "$ANDROID_CERTS_DIR/releasekey.x509.pem" ] || [ ! -f "$ANDROID_CERTS_DIR/releasekey.pk8" ]; then
-                echo -e "${CLR_BLD_RED}error: release keys not found in $ANDROID_CERTS_DIR${CLR_RST}"
-                exit 1
-        fi
+        checkReleaseKeys "$ANDROID_CERTS_DIR" || exit 1
         export ANDROID_CERTS_DIR
+elif [ -f "$DIR_ROOT/vendor/arcvelle-priv/keys/releasekey.x509.pem" ]; then
+        checkReleaseKeys "$DIR_ROOT/vendor/arcvelle-priv/keys" || exit 1
 fi
 
 # Setup AOSPA variant if specified
