@@ -138,6 +138,23 @@ function checkReleaseKeys {
         return 0
 }
 
+# Publish an OTA only after verifying its signature with the pinned key.
+function createVerifiedOta () (
+    local target_files="$1"
+    local output="$2"
+    shift 2
+
+    local staging_dir
+    staging_dir="$(mktemp -d -- "$(dirname -- "$output")/.arcvelle-ota.XXXXXXXX")" || exit 1
+    trap 'rm -rf -- "$staging_dir"' EXIT
+    local staged_ota="$staging_dir/$(basename -- "$output")"
+
+    ota_from_target_files -k "$SIGNING_KEYS_DIR/releasekey" --block "$@" \
+        "$target_files" "$staged_ota" || exit $?
+    check_ota_package_signature "$SIGNING_KEYS_DIR/releasekey.x509.pem" "$staged_ota" || exit $?
+    mv -f -- "$staged_ota" "$output"
+)
+
 ARCVELLE_RELEASE_CERT_SHA256="$(cat "$DIR_ROOT/vendor/aospa/target/product/arcvelle-release-key.sha256" 2>/dev/null)"
 
 # Use explicitly supplied signing keys for the build itself, so the
@@ -147,11 +164,16 @@ if [ -n "$KEY_MAPPINGS" ]; then
                 echo -e "${CLR_BLD_RED}error: signing keys directory not found ($KEY_MAPPINGS)${CLR_RST}"
                 exit 1
         fi
-        ANDROID_CERTS_DIR="$(readlink -f "$KEY_MAPPINGS")"
-        checkReleaseKeys "$ANDROID_CERTS_DIR" || exit 1
+        SIGNING_KEYS_DIR="$(readlink -f "$KEY_MAPPINGS")"
+        checkReleaseKeys "$SIGNING_KEYS_DIR" || exit 1
+        ANDROID_CERTS_DIR="$SIGNING_KEYS_DIR"
         export ANDROID_CERTS_DIR
 elif [ -f "$DIR_ROOT/vendor/arcvelle-priv/keys/releasekey.x509.pem" ]; then
-        checkReleaseKeys "$DIR_ROOT/vendor/arcvelle-priv/keys" || exit 1
+        SIGNING_KEYS_DIR="$(readlink -f "$DIR_ROOT/vendor/arcvelle-priv/keys")"
+        checkReleaseKeys "$SIGNING_KEYS_DIR" || exit 1
+        # Keep ANDROID_CERTS_DIR unset so version.mk loads in-tree keys.mk.
+        unset ANDROID_CERTS_DIR
+        KEY_MAPPINGS="$SIGNING_KEYS_DIR"
 fi
 
 # Setup AOSPA variant if specified
@@ -293,22 +315,20 @@ elif [ "${KEY_MAPPINGS}" ]; then
     fi
 
     # Make target-files-package
-    m otatools target-files-package "$CMD"
+    m otatools target-files-package check_ota_package_signature delta_generator "$CMD"
 
     checkExit
 
     echo -e "${CLR_BLD_BLU}Signing target files apks${CLR_RST}"
-    sign_target_files_apks -o -d $KEY_MAPPINGS \
-        "$OUT"/obj/PACKAGING/target_files_intermediates/aospa_$DEVICE-target_files.zip \
-        ArcvelleOS-$AOSPA_VERSION-signed-target_files.zip
+    signed_target_files="ArcvelleOS-$AOSPA_VERSION-signed-target_files.zip"
+    sign_target_files_apks -o -d "$SIGNING_KEYS_DIR" \
+        "$OUT/obj/PACKAGING/target_files_intermediates/aospa_$DEVICE-target_files.zip" \
+        "$signed_target_files"
 
     checkExit
 
     echo -e "${CLR_BLD_BLU}Generating signed install package${CLR_RST}"
-    ota_from_target_files -k $KEY_MAPPINGS/releasekey \
-        --block ${INCREMENTAL} \
-        ArcvelleOS-$AOSPA_VERSION-signed-target_files.zip \
-        ArcvelleOS-$AOSPA_VERSION.zip
+    createVerifiedOta "$signed_target_files" "ArcvelleOS-$AOSPA_VERSION.zip" ${INCREMENTAL}
 
     checkExit
 
@@ -318,17 +338,15 @@ elif [ "${KEY_MAPPINGS}" ]; then
                 echo -e "${CLR_BLD_RED}Delta error: base target files don't exist ($DELTA_TARGET_FILES)${CLR_RST}"
                 exit 1
         fi
-        ota_from_target_files -k $KEY_MAPPINGS/releasekey \
-            --block --incremental_from $DELTA_TARGET_FILES \
-            ArcvelleOS-$AOSPA_VERSION-signed-target_files.zip \
-            ArcvelleOS-$AOSPA_VERSION-delta.zip
+        createVerifiedOta "$signed_target_files" "ArcvelleOS-$AOSPA_VERSION-delta.zip" \
+            --incremental_from "$DELTA_TARGET_FILES"
         checkExit
     fi
 
     if [ "$FLAG_IMG_ZIP" = 'y' ]; then
         echo -e "${CLR_BLD_BLU}Generating signed fastboot package${CLR_RST}"
         img_from_target_files \
-            ArcvelleOS-$AOSPA_VERSION-signed-target_files.zip \
+            "$signed_target_files" \
             ArcvelleOS-$AOSPA_VERSION-image.zip
         checkExit
     fi
